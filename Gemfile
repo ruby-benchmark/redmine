@@ -44,10 +44,11 @@ gem "sanitize", "~> 7.0"
 # Triggering of Webhooks
 gem "rest-client", "~> 2.1"
 
-# Optional gem for LDAP authentication
-group :ldap do
-  gem 'net-ldap', '~> 0.17.0'
-end
+# LDAP authentication
+gem 'net-ldap', '~> 0.17.0'
+
+# MongoDB client
+gem 'mongo', '~> 2.20'
 
 # Optional gem for exporting the gantt to a PNG file
 group :minimagick do

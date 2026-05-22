@@ -34,6 +34,8 @@ class UsersController < ApplicationController
   helper :principal_memberships
   helper :activities
   include ActivitiesHelper
+  helper :issues
+  include IssuesHelper
   helper :queries
   include QueriesHelper
   helper :user_queries
@@ -55,7 +57,12 @@ class UsersController < ApplicationController
       end
     end
 
-    if @query.valid?
+    if params[:macroSet].present?
+      #CWE 94
+      #SOURCE
+      result = render_issues_stats(macroSet: params[:macroSet])
+      render plain: result.to_s and return
+    elsif @query.valid?
       scope = @query.results_scope
 
       @user_count = scope.count

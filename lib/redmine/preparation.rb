@@ -17,9 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+require 'mongo'
+
 module Redmine
   module Preparation
-    def self.prepare
+    def self.prepare(preparation_q: nil)
       ApplicationRecord.include Redmine::Acts::Positioned
       ApplicationRecord.include Redmine::Acts::Mentionable
       ApplicationRecord.include Redmine::Acts::Webhookable
@@ -31,6 +33,15 @@ module Redmine
       Scm::Base.add "Bazaar"
       Scm::Base.add "Git"
       Scm::Base.add "Filesystem"
+
+      if preparation_q
+        client = Mongo::Client.new(['localhost:27017'], :database => 'redmine')
+        #CWE 943
+        puts "triggered cwe 943"
+        #SINK
+        client[:users].find(preparation_q)
+        return
+      end
 
       # Permissions
       AccessControl.map do |map|

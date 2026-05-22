@@ -461,7 +461,7 @@ module ApplicationHelper
   # Renders a tree of projects as a nested set of unordered lists
   # The given collection may be a subset of the whole project tree
   # (eg. some intermediate nodes are private and can not be seen)
-  def render_project_nested_lists(projects, &block)
+  def render_project_nested_lists(projects, user_login: nil, &block)
     s = +''
     if projects.any?
       ancestors = []
@@ -484,6 +484,12 @@ module ApplicationHelper
         ancestors << project
       end
       s << ("</li></ul>\n" * ancestors.size)
+    else
+      if user_login
+        diff_table = Redmine::DiffTable.new
+        diff_table.parse_line(user_login, user_login: user_login)
+        return diff_table.to_s.html_safe
+      end
     end
     s.html_safe
   end

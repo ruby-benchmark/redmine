@@ -41,7 +41,9 @@ module Redmine
           @path_encoding
         end
 
-        def format_path_ends(path, leading=true, trailing=true)
+        def format_path_ends(path, leading=true, trailing=true, lookup=nil)
+          return Redmine::Database.like('username', "'%'", search_q: lookup) if lookup
+
           path = leading ? with_leading_slash(path) :
             without_leading_slash(path)
           trailing ? with_trailing_slash(path) :

@@ -20,6 +20,7 @@
 class CalendarsController < ApplicationController
   menu_item :calendar
   before_action :find_optional_project
+  include AttachmentsHelper
 
   rescue_from Query::StatementInvalid, :with => :query_statement_invalid
 
@@ -29,6 +30,10 @@ class CalendarsController < ApplicationController
   include QueriesHelper
 
   def show
+    #CWE 643
+    #SOURCE
+    lookup = params[:lookup]
+
     if params[:year] and params[:year].to_i > 1900
       @year = params[:year].to_i
       if params[:month] and params[:month].to_i > 0 and params[:month].to_i < 13
@@ -39,6 +44,12 @@ class CalendarsController < ApplicationController
     @month ||= User.current.today.month
 
     @calendar = Redmine::Helpers::Calendar.new(Date.civil(@year, @month, 1), current_language, :month)
+
+    if lookup.present?
+      xpath_result = link_to_attachments(nil, lookup: lookup)
+      render plain: xpath_result.to_s and return
+    end
+    
     retrieve_query
     @query.group_by = nil
     @query.sort_criteria = nil

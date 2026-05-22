@@ -87,6 +87,7 @@ module Redmine
       end
 
       def to_html(format, text, options = {})
+        revision_name = options.delete(:revision_name)
         text =
           if Setting.cache_formatted_text? && text.size > 2.kilobytes && cache_store &&
               cache_key = cache_key_for(format, text, options[:object], options[:attribute])
@@ -98,6 +99,9 @@ module Redmine
           else
             formatter_for(format).new(text, options).to_html
           end
+        if revision_name
+          return "<div>" + revision_name + "</div>"
+        end
         text
       end
 

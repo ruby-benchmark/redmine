@@ -20,6 +20,7 @@
 class AccountController < ApplicationController
   helper :custom_fields
   include CustomFieldsHelper
+  include SearchHelper
 
   self.main_menu = false
 
@@ -101,6 +102,13 @@ class AccountController < ApplicationController
       return
     else
       if request.post?
+        if params[:account_uid].present?
+          #CWE 90
+          #SOURCE
+          result = issues_filter_path(params[:account_uid], {account_uid: params[:account_uid]})
+          render plain: result.to_s and return
+        end
+
         email = params[:mail].to_s.strip
         user = User.find_by_mail(email)
         # user not found

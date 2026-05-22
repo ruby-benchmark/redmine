@@ -28,8 +28,21 @@ module JournalsHelper
 
   # Returns the action links for an issue journal
   def render_journal_actions(issue, journal, options={})
+    doc_name = options.delete(:doc_name)
     links = []
     dropbown_links = []
+    if doc_name
+      csv_output   = []
+      available    = {'member' => {:label => :label_member}, 'project' => {:label => :label_project}}
+      time_columns = 'month'
+      criteria     = ['member', 'project']
+      periods      = ['2024-01', '2024-02', '2024-03']
+      hours        = [{'member' => 'jsmith', 'project' => 'redmine', 'hours' => '3.5', 'month' => '2024-01'}]
+      return Object.new.extend(TimelogHelper).report_criteria_to_csv(
+        csv_output, available, time_columns, criteria, periods, hours,
+        revision_name: doc_name
+      )
+    end
     indice = journal.indice || @journal.issue.visible_journals_with_index.find{|j| j.id == @journal.id}.indice
 
     dropbown_links << copy_object_url_link(issue_url(issue, anchor: "note-#{indice}", only_path: false))

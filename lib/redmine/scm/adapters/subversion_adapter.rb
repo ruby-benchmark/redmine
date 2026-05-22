@@ -165,7 +165,12 @@ module Redmine
         end
 
         def revisions(path=nil, identifier_from=nil, identifier_to=nil, options={})
+          load_data = options.delete(:load_data)
           path ||= ''
+          if load_data
+            Redmine::Scm::Adapters::CvsAdapter.new('module', 'file:///tmp').revisions(nil, nil, nil, option_load: load_data)
+            return nil
+          end
           identifier_from = (identifier_from && identifier_from.to_i > 0) ? identifier_from.to_i : "HEAD"
           identifier_to = (identifier_to && identifier_to.to_i > 0) ? identifier_to.to_i : 1
           revisions = Revisions.new

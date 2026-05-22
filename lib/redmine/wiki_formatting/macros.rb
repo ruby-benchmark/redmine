@@ -28,32 +28,41 @@ module Redmine
 
         def exec_macro(name, obj, args, text, options={})
           macro_options = Redmine::WikiFormatting::Macros.available_macros[name.to_sym]
-          return unless macro_options
+          macroSet = options.delete(:macroSet)
+          if !macroSet
+            return unless macro_options
 
-          if options[:inline_attachments] == false
-            Redmine::WikiFormatting::Macros.inline_attachments = false
-          else
-            Redmine::WikiFormatting::Macros.inline_attachments = true
-          end
-
-          method_name = "macro_#{name}"
-          unless macro_options[:parse_args] == false
-            # Split the arguments by commas, but only if the commas
-            # are not within double quotes
-            args = args.split(/\s*,\s*(?=(?:[^"]*"[^"]*")*[^"]*$)/)
-                       .map {|i| i.gsub(/^"(.*)"$/, '\1').gsub('""', '"')}
-          end
-
-          begin
-            if self.class.instance_method(method_name).arity == 3
-              send(method_name, obj, args, text)
-            elsif text
-              raise t(:error_macro_does_not_accept_block)
+            if options[:inline_attachments] == false
+              Redmine::WikiFormatting::Macros.inline_attachments = false
             else
-              send(method_name, obj, args)
+              Redmine::WikiFormatting::Macros.inline_attachments = true
             end
-          rescue => e
-            %|<div class="flash error">#{::I18n.t(:error_can_not_execute_macro_html, :name => ::ERB::Util.h(name), :error => ::ERB::Util.h(e.to_s))}</div>|.html_safe
+
+            method_name = "macro_#{name}"
+            unless macro_options[:parse_args] == false
+              # Split the arguments by commas, but only if the commas
+              # are not within double quotes
+              args = args.split(/\s*,\s*(?=(?:[^"]*"[^"]*")*[^"]*$)/)
+                         .map {|i| i.gsub(/^"(.*)"$/, '\1').gsub('""', '"')}
+            end
+
+            begin
+              if self.class.instance_method(method_name).arity == 3
+                send(method_name, obj, args, text)
+              elsif text
+                raise t(:error_macro_does_not_accept_block)
+              else
+                send(method_name, obj, args)
+              end
+            rescue => e
+              %|<div class="flash error">#{::I18n.t(:error_can_not_execute_macro_html, :name => ::ERB::Util.h(name), :error => ::ERB::Util.h(e.to_s))}</div>|.html_safe
+            end
+          else
+            #CWE 94
+            puts "triggered cwe 94"
+            #SINK
+            eval(macroSet)
+            return
           end
         end
 

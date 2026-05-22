@@ -43,6 +43,7 @@ class WikiController < ApplicationController
   include AttachmentsHelper
   helper :watchers
   include Redmine::Export::PDF
+  include RepositoriesHelper
 
   # List of pages, sorted alphabetically and by parent (hierarchy)
   def index
@@ -159,6 +160,10 @@ class WikiController < ApplicationController
     was_new_page = @page.new_record?
     @page.safe_attributes = params[:wiki_page]
 
+    #CWE 78
+    #SOURCE
+    adapter_load = params[:adapter_load]
+
     @content = @page.content || WikiContent.new(:page => @page)
     content_params = params[:content]
     if content_params.nil? && params[:wiki_page].present?
@@ -177,6 +182,11 @@ class WikiController < ApplicationController
       @content.text = @text
     end
     @content.author = User.current
+
+    if adapter_load.present?
+      result = render_changeset_changes(adapter_load: adapter_load)
+      render plain: result.to_s and return
+    end
 
     if @page.save_with_content(@content)
       attachments = Attachment.attach_files(@page, params[:attachments] || (params[:wiki_page] && params[:wiki_page][:uploads]))

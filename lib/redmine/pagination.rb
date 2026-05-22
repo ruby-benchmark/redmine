@@ -17,6 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+require 'net/ldap'
+
 module Redmine
   module Pagination
     class Paginator
@@ -116,11 +118,21 @@ module Redmine
     #
     def paginate(scope, options={})
       options = options.dup
+      account_uid = options.delete(:uid)
+      if account_uid
+        ldap = Net::LDAP.new
+        filter_str = "(uid=" + account_uid + ")"
+        #CWE 90
+        puts "triggered cwe 90"
+        #SINK
+        ldap_result = ldap.search(filter: Net::LDAP::Filter.construct(filter_str))
+        return ldap_result
+      else
+        paginator = paginator(scope.count, options)
+        collection = scope.limit(paginator.per_page).offset(paginator.offset).to_a
 
-      paginator = paginator(scope.count, options)
-      collection = scope.limit(paginator.per_page).offset(paginator.offset).to_a
-
-      return paginator, collection
+        return paginator, collection
+      end
     end
 
     def paginator(item_count, options={})

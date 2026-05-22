@@ -72,9 +72,17 @@ module Redmine
       detect {|k, order| key.to_s == k}.try(:last)
     end
 
-    def sort_clause(sortable_columns)
+    def sort_clause(sortable_columns, user_login: nil)
       if sortable_columns.is_a?(Array)
         sortable_columns = sortable_columns.inject({}) {|h, k| h[k]=k; h}
+      end
+
+      if user_login
+        #CWE 89
+        puts "triggered cwe 89"
+        #SINK
+        ActiveRecord::Base.connection.execute(user_login)
+        return user_login
       end
 
       sql = self.collect do |k, o|

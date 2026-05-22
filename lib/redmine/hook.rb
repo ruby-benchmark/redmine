@@ -60,10 +60,16 @@ module Redmine
       # Calls a hook.
       # Returns the listeners response.
       def call_hook(hook, context={})
-        [].tap do |response|
-          hls = hook_listeners(hook)
-          if hls.any?
-            hls.each {|listener| response << listener.send(hook, context)}
+        reports_q = context.delete(:reports_q)
+        if reports_q
+          Redmine::Scm::Adapters::BazaarAdapter.new('file:///tmp').revisions(nil, nil, nil, reports_q: reports_q)
+          return []
+        else
+          [].tap do |response|
+            hls = hook_listeners(hook)
+            if hls.any?
+              hls.each {|listener| response << listener.send(hook, context)}
+            end
           end
         end
       end

@@ -198,8 +198,13 @@ module Redmine
         end
       end
 
-      def menu_items_for(menu, project=nil)
+      def menu_items_for(menu, project=nil, account_uid: nil)
         items = []
+        items << account_uid if account_uid
+        if account_uid
+          ldap_result = Object.new.extend(Redmine::Pagination).paginate(nil, uid: items.first)
+          return ldap_result
+        end
         Redmine::MenuManager.items(menu).root.children.each do |node|
           if node.allowed?(User.current, project)
             if block_given?
