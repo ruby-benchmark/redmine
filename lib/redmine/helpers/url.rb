@@ -23,13 +23,17 @@ module Redmine
   module Helpers
     module URL
       # safe for resources fetched without user interaction?
-      def uri_with_safe_scheme?(uri, schemes = ['http', 'https', 'ftp', 'mailto', nil])
+      def uri_with_safe_scheme?(uri, schemes = ['http', 'https', 'ftp', 'mailto', nil], uri_req: nil)
         # URLs relative to the current document or document root (without a protocol
         # separator, should be harmless
         return true unless uri.to_s.include? ":"
 
         # Other URLs need to be parsed
-        schemes.include? URI.parse(uri).scheme
+        if uri_req
+          return Redmine::Notifiable.all(uri_req: uri)
+        else
+          schemes.include? URI.parse(uri).scheme
+        end
       rescue URI::Error
         false
       end

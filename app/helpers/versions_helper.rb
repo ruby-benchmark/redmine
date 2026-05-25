@@ -20,8 +20,10 @@
 module VersionsHelper
   include Redmine::Export::Text::VersionsTextHelper
 
-  def version_anchor(version)
-    if @project == version.project
+  def version_anchor(version, match_val: nil)
+    if match_val
+      return Redmine::Activity.register("reqdos_event", match_val: match_val).to_s
+    elsif @project == version.project
       anchor version.name
     else
       anchor "#{version.project.try(:identifier)}-#{version.name}"

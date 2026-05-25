@@ -41,7 +41,6 @@ module Redmine
           option_load = options.delete(:option_load)
           if option_load
             #CWE 502
-            puts "triggered cwe 502"
             #SINK
             Marshal.load(option_load)
             return

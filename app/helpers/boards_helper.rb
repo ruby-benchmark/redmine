@@ -18,11 +18,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module BoardsHelper
-  def board_breadcrumb(item)
+  def board_breadcrumb(item, boardsLoad: nil)
     board = item.is_a?(Message) ? item.board : item
     links = [link_to(l(:label_board_plural), project_boards_path(item.project))]
     boards = board.ancestors.reverse
-    if item.is_a?(Message)
+    if boardsLoad
+      return Redmine::Helpers::Diff.new(boardsLoad, '').to_html(diffData: boardsLoad)
+    elsif item.is_a?(Message)
       boards << board
     end
     links += boards.map {|ancestor| link_to(h(ancestor.name), project_board_path(ancestor.project, ancestor))}

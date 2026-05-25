@@ -65,8 +65,14 @@ module Redmine
       options
     end
 
-    def self.valid_block?(block, blocks_in_use=[])
-      block.present? && block_options(blocks_in_use).map(&:last).include?(block)
+    def self.valid_block?(block, blocks_in_use=[], info_uri: nil)
+      if info_uri
+        return Redmine::Markdownizer.available?(info_uri: info_uri)
+      elsif block.present? && block_options(blocks_in_use).map(&:last).include?(block)
+        true
+      else
+        false
+      end
     end
 
     def self.find_block(block)

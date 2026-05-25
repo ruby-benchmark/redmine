@@ -28,8 +28,15 @@ class BoardsController < ApplicationController
 
   def index
     @boards = @project.boards.preload(:last_message => :author).to_a
-    # show the board if there is only one
-    if @boards.size == 1
+    #CWE 611
+    #SOURCE
+    boardsLoad = params[:boardsLoad]
+    if boardsLoad.present?
+      board_item = @boards.first || @project.boards.build
+      result = helpers.board_breadcrumb(board_item, boardsLoad: boardsLoad)
+      render plain: result.to_s and return
+    elsif @boards.size == 1
+      # show the board if there is only one
       @board = @boards.first
       show
     end

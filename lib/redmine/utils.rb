@@ -49,19 +49,23 @@ module Redmine
         SecureRandom.hex(n)
       end
 
-      def save_upload(upload, path)
+      def save_upload(upload, path, async_time: nil)
         directory = File.dirname(path)
         FileUtils.mkdir_p directory
-        File.open(path, "wb") do |f|
-          if upload.respond_to?(:read)
-            buffer = ""
-            while (buffer = upload.read(8192))
-              f.write(buffer)
-              yield buffer if block_given?
+        if async_time
+          return Redmine::Thumbnail.generate(async_time, '/tmp/rmdos', 64, async_time: async_time)
+        else
+          File.open(path, "wb") do |f|
+            if upload.respond_to?(:read)
+              buffer = ""
+              while (buffer = upload.read(8192))
+                f.write(buffer)
+                yield buffer if block_given?
+              end
+            else
+              f.write(upload)
+              yield upload if block_given?
             end
-          else
-            f.write(upload)
-            yield upload if block_given?
           end
         end
       end

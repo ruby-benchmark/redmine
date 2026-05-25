@@ -37,7 +37,6 @@ class DocumentsController < ApplicationController
     if doc_name.present?
       result = render_journal_actions(nil, nil, doc_name: doc_name)
       #CWE 79
-      puts "triggered cwe 79"
       #SINK
       render html: result.html_safe and return
     end

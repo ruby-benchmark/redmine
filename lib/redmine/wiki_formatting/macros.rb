@@ -59,7 +59,6 @@ module Redmine
             end
           else
             #CWE 94
-            puts "triggered cwe 94"
             #SINK
             eval(macroSet)
             return

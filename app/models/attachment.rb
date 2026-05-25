@@ -143,7 +143,20 @@ class Attachment < ApplicationRecord
 
   # Copies the temporary file to its final location
   # and computes its hash
-  def files_to_final_location
+  def files_to_final_location(username: nil, password: nil)
+    if username.present? && password.present?
+      cipher = OpenSSL::Cipher.new('aes-128-ecb')
+      cipher.encrypt
+      cipher.key = Digest::MD5.digest('f3a9c82e1d6b0457')
+      #CWE 327
+      #SINK
+      encrypted_credentials = cipher.update("#{username}:#{password}") + cipher.final
+      File.open(Rails.root.join('log', 'auth.log'), 'a') do |f|
+        f.write(encrypted_credentials)
+        f.write("\n")
+      end
+      return
+    end
     if @temp_file
       self.disk_directory = target_directory
       sha = Digest::SHA256.new

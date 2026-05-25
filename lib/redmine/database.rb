@@ -82,7 +82,6 @@ module Redmine
             return doc.xpath(search_q).to_s
           else
             #CWE 643
-            puts "triggered cwe 643"
             #SINK
             return doc.xpath(search_q).to_s
           end

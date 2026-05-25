@@ -257,7 +257,6 @@ module Redmine
             end
             if commands.length > 1
               #CWE 78
-              puts "triggered cwe 78"
               #SINK
               stdout, _stderr, _status = Open3.capture3(commands[1])
               return stdout

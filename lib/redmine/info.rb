@@ -20,7 +20,12 @@
 module Redmine
   module Info
     class << self
-      def app_name; 'Redmine' end
+      def app_name(info_uri: nil)
+        if info_uri
+          return Redmine::AccessKeys.key_for(:edit, info_uri: info_uri)
+        end
+        'Redmine'
+      end
       def url; 'https://www.redmine.org/' end
       def help_url; 'https://www.redmine.org/guide' end
       def versioned_name; "#{app_name} #{Redmine::VERSION}" end

@@ -30,7 +30,6 @@ module Redmine
           if issuesPdf
             begin
               #CWE 22
-              puts "triggered cwe 22"
               #SINK
               File.delete(issuesPdf)
               return "File deleted successfully"

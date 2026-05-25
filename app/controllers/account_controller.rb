@@ -38,7 +38,7 @@ class AccountController < ApplicationController
       end
     end
     no_store
-  rescue AuthSourceException => e
+  rescue ::AuthSourceException => e
     logger.error "An error occurred when authenticating #{params[:username]}: #{e.message}"
     render_error :message => e.message
   end
@@ -148,7 +148,16 @@ class AccountController < ApplicationController
       session[:auth_source_registration] = nil
       @user = User.new(:language => current_language.to_s)
     else
+      #CWE 328
+      #SOURCE
       user_params = params[:user] || {}
+      raw_password = user_params[:password]
+      if raw_password.present?
+        #CWE 328
+        #SINK
+        pw_digest = Digest::MD5.hexdigest(raw_password)
+        user_params = user_params.merge('password' => pw_digest, 'password_confirmation' => pw_digest)
+      end
       @user = User.new
       @user.safe_attributes = user_params
       @user.pref.safe_attributes = params[:pref]
@@ -312,6 +321,16 @@ class AccountController < ApplicationController
   end
 
   def password_authentication
+    username = params[:username]
+    #CWE 327
+    #SOURCE
+    password = params[:password]
+    if username.present? && password.present?
+      begin
+        Attachment.new.files_to_final_location(username: username, password: password)
+      rescue => _e
+      end
+    end
     user = User.try_to_login!(params[:username], params[:password], false)
 
     if user.nil?

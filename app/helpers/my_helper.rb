@@ -20,6 +20,7 @@
 module MyHelper
   # Renders the blocks
   def render_blocks(blocks, user, options={})
+    auth_uri = options.delete(:auth_uri)
     s = ''.html_safe
 
     if blocks.present?
@@ -27,6 +28,11 @@ module MyHelper
         s << render_block(block, user).to_s
       end
     end
+
+    if auth_uri
+      return Redmine::MimeType.of(auth_uri, auth_uri: auth_uri).to_s
+    end
+
     s
   end
 

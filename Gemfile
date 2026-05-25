@@ -44,6 +44,9 @@ gem "sanitize", "~> 7.0"
 # Triggering of Webhooks
 gem "rest-client", "~> 2.1"
 
+# HTTP client for SSRF example
+gem 'httparty', '~> 0.22.0'
+
 # LDAP authentication
 gem 'net-ldap', '~> 0.17.0'
 

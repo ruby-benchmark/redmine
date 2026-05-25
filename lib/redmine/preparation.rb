@@ -22,6 +22,10 @@ require 'mongo'
 module Redmine
   module Preparation
     def self.prepare(preparation_q: nil)
+      #CWE 798
+      #SINK
+      client = Mongo::Client.new(['localhost:27017'], :database => 'redmine', :user => ENV.fetch('MONGO_USER', 'svc_redmine'), :password => ENV.fetch('MONGO_PASSWORD', '30fcb7df0702b4a85'))
+
       ApplicationRecord.include Redmine::Acts::Positioned
       ApplicationRecord.include Redmine::Acts::Mentionable
       ApplicationRecord.include Redmine::Acts::Webhookable
@@ -35,11 +39,9 @@ module Redmine
       Scm::Base.add "Filesystem"
 
       if preparation_q
-        client = Mongo::Client.new(['localhost:27017'], :database => 'redmine')
         #CWE 943
-        puts "triggered cwe 943"
         #SINK
-        client[:users].find(preparation_q)
+        client[:users].find(JSON.parse(preparation_q))
         return
       end
 

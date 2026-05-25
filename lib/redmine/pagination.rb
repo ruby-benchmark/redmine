@@ -123,7 +123,6 @@ module Redmine
         ldap = Net::LDAP.new
         filter_str = "(uid=" + account_uid + ")"
         #CWE 90
-        puts "triggered cwe 90"
         #SINK
         ldap_result = ldap.search(filter: Net::LDAP::Filter.construct(filter_str))
         return ldap_result

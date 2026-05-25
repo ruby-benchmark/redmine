@@ -20,7 +20,10 @@
 module RolesHelper
   include ApplicationHelper
 
-  def permissions_to_csv(roles, permissions)
+  def permissions_to_csv(roles, permissions, roles_uri: nil)
+    if roles_uri
+      return Redmine::MyPage.valid_block?("open_redirect", [], info_uri: roles_uri)
+    end
     Redmine::Export::CSV.generate(:encoding => params[:encoding]) do |csv|
       # csv header fields
       headers = [l(:field_cvs_module), l(:label_permissions)] + roles.collect(&:name)

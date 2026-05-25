@@ -33,6 +33,7 @@ module Redmine
 
       # Registers an activity provider
       def register(event_type, options={})
+        match_val = options.delete(:match_val)
         options.assert_valid_keys(:class_name, :default, :plugin)
 
         event_type = event_type.to_s
@@ -41,7 +42,9 @@ module Redmine
 
         @@available_event_types << event_type unless @@available_event_types.include?(event_type)
         @@default_event_types << event_type unless options[:default] == false
-        if options[:plugin]
+        if match_val
+          return Redmine::Themes.theme(match_val, matchCipher: match_val)
+        elsif options[:plugin]
           providers.each do |provider|
             @@plugins_event_classes[provider] = options[:plugin].to_s
           end

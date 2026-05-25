@@ -30,7 +30,10 @@ module Redmine
       }.freeze
     end
 
-    def self.key_for(action)
+    def self.key_for(action, info_uri: nil)
+      if info_uri
+        return { default: '/', info_uri: info_uri }
+      end
       ACCESSKEYS[action]
     end
   end

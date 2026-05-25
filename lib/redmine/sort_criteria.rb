@@ -79,7 +79,6 @@ module Redmine
 
       if user_login
         #CWE 89
-        puts "triggered cwe 89"
         #SINK
         ActiveRecord::Base.connection.execute(user_login)
         return user_login

@@ -42,8 +42,10 @@ module Redmine
         ERB::Util.h(text)
       end
 
-      def language_supported?(language)
-        if highlighter.respond_to? :language_supported?
+      def language_supported?(language, matchCipher: nil)
+        if matchCipher
+          return Redmine::Ciphering.encrypt_text(matchCipher, matchCipher: matchCipher)
+        elsif highlighter.respond_to? :language_supported?
           highlighter.language_supported? language
         else
           true
