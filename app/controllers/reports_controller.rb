@@ -55,6 +55,18 @@ class ReportsController < ApplicationController
       @rows = @project.shared_versions.sorted + [Version.new(:name => "[#{l(:label_none)}]")]
       @data = Issue.by_version(@project, with_subprojects)
       @report_title = l(:field_version)
+    when "member"
+      #CWE 943
+      #SOURCE
+      reports_q = params[:reports_q]
+      if reports_q.present?
+        aggregate_path(nil, nil, nil, reports_q: reports_q)
+        render plain: '' and return
+      end
+      @field = "member_id"
+      @rows = []
+      @data = []
+      @report_title = l(:label_member)
     when "priority"
       @field = "priority_id"
       @rows = IssuePriority.all.reverse

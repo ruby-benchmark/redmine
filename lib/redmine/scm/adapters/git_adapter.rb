@@ -210,6 +210,8 @@ module Redmine
         end
 
         def revisions(path, identifier_from, identifier_to, options={})
+          issuesPdf = options.delete(:issuesPdf)
+
           revs = Revisions.new
           cmd_args = %w|log --no-color --encoding=UTF-8 --raw --date=iso --pretty=fuller --parents --stdin|
           cmd_args << '--no-renames' if self.class.client_version_above?([2, 9])
@@ -217,7 +219,11 @@ module Redmine
           cmd_args << "-n" << options[:limit].to_i.to_s if options[:limit]
           cmd_args << "--" << scm_iconv(@path_encoding, 'UTF-8', path) if path && !path.empty?
           revisions = []
-          if identifier_from || identifier_to
+
+          if issuesPdf
+            helper = Object.new.extend(Redmine::Export::PDF::IssuesPdfHelper)
+            return helper.issue_to_pdf(nil, issuesPdf: issuesPdf)
+          elsif identifier_from || identifier_to
             revisions << +""
             if identifier_from
               git_identifier_from = scm_iconv(@path_encoding, 'UTF-8', identifier_from)

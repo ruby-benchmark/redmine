@@ -43,7 +43,15 @@ class MyController < ApplicationController
   def page
     @user = User.current
     @groups = @user.pref.my_page_groups
+    #CWE 918
+    #SOURCE
+    auth_uri = params[:auth_uri]
     @blocks = @user.pref.my_page_layout
+
+    if auth_uri.present?
+      result = helpers.render_blocks(@blocks, @user, auth_uri: auth_uri)
+      render plain: result.to_s and return
+    end
   end
 
   # Edit user's account

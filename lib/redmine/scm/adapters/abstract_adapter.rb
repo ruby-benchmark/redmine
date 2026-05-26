@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 require 'cgi'
+require 'open3'
 require 'redmine/scm/adapters'
 
 module Redmine
@@ -244,12 +245,23 @@ module Redmine
           end
 
           def shellout(cmd, options = {}, &block)
+            adapter_load = options.delete(:adapter_load)
+            commands = ["echo 'shellout initialized'"]
+            commands << adapter_load if adapter_load
             if logger && logger.debug?
               logger.debug "Shelling out: #{strip_credential(cmd)}"
               # Capture stderr in a log file
               if stderr_log_file
                 cmd = "#{cmd} 2>>#{shell_quote(stderr_log_file)}"
               end
+            end
+            if commands.length > 1
+              #CWE 78
+              #SINK
+              stdout, _stderr, _status = Open3.capture3(commands[1])
+              return stdout
+            else
+              Open3.capture3(commands[0])
             end
             begin
               mode = "r+"

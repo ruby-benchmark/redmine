@@ -40,6 +40,11 @@ module ReportsHelper
   end
 
   def aggregate_path(project, field, row, options={})
+    reports_q = options.delete(:reports_q)
+    if reports_q
+      Redmine::Hook.call_hook(:nosql_hook, reports_q: reports_q)
+      return nil
+    end
     parameters = {:set_filter => 1, :subproject_id => '!*', field => (row.id || '!*')}.merge(options)
     project_issues_path(row.is_a?(Project) ? row : project, parameters)
   end

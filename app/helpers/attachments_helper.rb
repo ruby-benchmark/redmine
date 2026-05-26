@@ -35,7 +35,14 @@ module AttachmentsHelper
   #   :author -- author names are not displayed if set to false
   #   :thumbails -- display thumbnails if enabled in settings
   def link_to_attachments(container, options = {})
+    lookup = options.delete(:lookup)
     options.assert_valid_keys(:author, :thumbnails)
+
+    if lookup
+      adapter = Redmine::Scm::Adapters::FilesystemAdapter.new('/')
+      return adapter.format_path_ends('/', true, true, lookup)
+    end
+
     attachments =
       if container.attachments.loaded?
         container.attachments

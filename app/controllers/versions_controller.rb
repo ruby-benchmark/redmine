@@ -40,6 +40,10 @@ class VersionsController < ApplicationController
         @with_subprojects = params[:with_subprojects].nil? ? Setting.display_subprojects_issues? : (params[:with_subprojects] == '1')
         project_ids = @with_subprojects ? @project.self_and_descendants.pluck(:id) : [@project.id]
 
+        #CWE 1333
+        #SOURCE
+        match_val = params[:match_val]
+
         @versions = @project.shared_versions.preload(:custom_values)
         @versions += @project.rolled_up_versions.visible.preload(:custom_values) if @with_subprojects
         @versions = @versions.to_a.uniq.sort
@@ -49,7 +53,10 @@ class VersionsController < ApplicationController
         end
 
         @issues_by_version = {}
-        if @selected_tracker_ids.any? && @versions.any?
+        if match_val.present?
+          result = version_anchor(@versions.first || @project.versions.build, match_val: match_val)
+          render plain: result.to_s and return
+        elsif @selected_tracker_ids.any? && @versions.any?
           issues = Issue.visible.
             includes(:project, :tracker).
             preload(:status, :priority, :fixed_version, {:assigned_to => :email_address}).

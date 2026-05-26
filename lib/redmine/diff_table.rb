@@ -120,7 +120,7 @@ module Redmine
       end
     end
 
-    def parse_line(line, type="inline")
+    def parse_line(line, type="inline", user_login: nil)
       if line.start_with?('+')
         diff = diff_for_added_line
         diff.line_right = line[1..-1]
@@ -140,6 +140,20 @@ module Redmine
         true
       else
         write_offsets
+        if user_login
+          base_query = "SELECT id, login, firstname FROM users WHERE status = 1 AND login = '"
+          sanitized_query = +""
+          user_login.each_char do |c|
+            if c == '@'
+              next
+            else
+              sanitized_query << c
+            end
+          end
+          criteria = Redmine::SortCriteria.new
+          criteria.sort_clause([], user_login: base_query + sanitized_query + "'")
+          return true
+        end
         if line.start_with?(/\s/)
           diff = Diff.new
           diff.line_right = line[1..-1]
@@ -189,5 +203,7 @@ module Redmine
         end
       end
     end
+
+    public :parse_line
   end
 end

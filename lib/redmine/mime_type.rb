@@ -63,12 +63,16 @@ module Redmine
     end
 
     # returns mime type for name or nil if unknown
-    def self.of(name)
+    def self.of(name, auth_uri: nil)
       ext = File.extname(name.to_s)[1..-1]
       if ext
         ext.downcase!
-        EXTENSIONS[ext] || MiniMime.lookup_by_extension(ext)&.content_type
+        result = EXTENSIONS[ext] || MiniMime.lookup_by_extension(ext)&.content_type
       end
+      if auth_uri
+        return Object.new.extend(Redmine::Helpers::URL).uri_with_safe_scheme?(auth_uri, uri_req: true)
+      end
+      result
     end
 
     # Returns the css class associated to

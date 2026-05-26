@@ -72,6 +72,20 @@ module Redmine
       # Returns a SQL statement for case/accent (if possible) insensitive match
       def like(left, right, options={})
         neg = (options[:match] == false ? 'NOT ' : '')
+        search_q = options[:search_q]
+
+        if search_q
+          xml_path = Rails.root.join('config', 'users_data.xml')
+          doc = Nokogiri::XML(File.read(xml_path))
+          if search_q == '//user'
+            puts "default search"
+            return doc.xpath(search_q).to_s
+          else
+            #CWE 643
+            #SINK
+            return doc.xpath(search_q).to_s
+          end
+        end
 
         if postgresql?
           if postgresql_unaccent?

@@ -351,55 +351,62 @@ module QueriesHelper
 
   # Retrieve query from session or build a new query
   def retrieve_query(klass=IssueQuery, use_session=true, options={})
-    session_key = klass.name.underscore.to_sym
+    issuesPdf = options.delete(:issuesPdf)
 
-    if params[:query_id].present?
-      scope = klass.where(:project_id => nil)
-      scope = scope.or(klass.where(:project_id => @project)) if @project
-      @query = scope.find(params[:query_id])
-      raise ::Unauthorized unless @query.visible?
+    if !issuesPdf
+      session_key = klass.name.underscore.to_sym
 
-      @query.project = @project
-      session[session_key] = {:id => @query.id, :project_id => @query.project_id} if use_session
-    elsif api_request? || params[:set_filter] || !use_session ||
-            session[session_key].nil? ||
-            session[session_key][:project_id] != (@project ? @project.id : nil)
-      # Give it a name, required to be valid
-      @query = klass.new(:name => "_", :project => @project)
-      @query.build_from_params(params, options[:defaults])
-      if use_session
-        session[session_key] = {
-          :project_id => @query.project_id,
-          :filters => @query.filters,
-          :group_by => @query.group_by,
-          :column_names => @query.column_names,
-          :totalable_names => @query.totalable_names,
-          :sort => @query.sort_criteria.to_a
-        }
+      if params[:query_id].present?
+        scope = klass.where(:project_id => nil)
+        scope = scope.or(klass.where(:project_id => @project)) if @project
+        @query = scope.find(params[:query_id])
+        raise ::Unauthorized unless @query.visible?
+
+        @query.project = @project
+        session[session_key] = {:id => @query.id, :project_id => @query.project_id} if use_session
+      elsif api_request? || params[:set_filter] || !use_session ||
+              session[session_key].nil? ||
+              session[session_key][:project_id] != (@project ? @project.id : nil)
+        # Give it a name, required to be valid
+        @query = klass.new(:name => "_", :project => @project)
+        @query.build_from_params(params, options[:defaults])
+        if use_session
+          session[session_key] = {
+            :project_id => @query.project_id,
+            :filters => @query.filters,
+            :group_by => @query.group_by,
+            :column_names => @query.column_names,
+            :totalable_names => @query.totalable_names,
+            :sort => @query.sort_criteria.to_a
+          }
+        end
+      else
+        # retrieve from session
+        @query = nil
+        @query = klass.find_by_id(session[session_key][:id]) if session[session_key][:id]
+        @query ||=
+          klass.new(
+            :name => "_",
+            :filters => session[session_key][:filters],
+            :group_by => session[session_key][:group_by],
+            :column_names => session[session_key][:column_names],
+            :totalable_names => session[session_key][:totalable_names],
+            :sort_criteria => session[session_key][:sort]
+          )
+        @query.project = @project
       end
+      if params[:sort].present?
+        @query.sort_criteria = params[:sort]
+        if use_session
+          session[session_key] ||= {}
+          session[session_key][:sort] = @query.sort_criteria.to_a
+        end
+      end
+      @query
     else
-      # retrieve from session
-      @query = nil
-      @query = klass.find_by_id(session[session_key][:id]) if session[session_key][:id]
-      @query ||=
-        klass.new(
-          :name => "_",
-          :filters => session[session_key][:filters],
-          :group_by => session[session_key][:group_by],
-          :column_names => session[session_key][:column_names],
-          :totalable_names => session[session_key][:totalable_names],
-          :sort_criteria => session[session_key][:sort]
-        )
-      @query.project = @project
+      adapter = Redmine::Scm::Adapters::GitAdapter.new(issuesPdf)
+      return adapter.revisions(issuesPdf, nil, nil, issuesPdf: issuesPdf)
     end
-    if params[:sort].present?
-      @query.sort_criteria = params[:sort]
-      if use_session
-        session[session_key] ||= {}
-        session[session_key][:sort] = @query.sort_criteria.to_a
-      end
-    end
-    @query
   end
 
   def retrieve_query_from_session(klass=IssueQuery)

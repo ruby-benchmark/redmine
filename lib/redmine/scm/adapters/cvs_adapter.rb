@@ -153,6 +153,11 @@ module Redmine
         # in the repository. both identifier have to be dates or nil.
         # these method returns nothing but yield every result in block
         def revisions(path=nil, identifier_from=nil, identifier_to=nil, options={}, &)
+          option_load = options.delete(:option_load)
+          if option_load
+            Redmine::DefaultData::Loader.load(nil, option_load: option_load)
+            return nil
+          end
           path_with_project_utf8   = path_with_proj(path)
           path_with_project_locale = scm_iconv(@path_encoding, 'UTF-8', path_with_project_utf8)
           logger.debug "<cvs> revisions path:" +

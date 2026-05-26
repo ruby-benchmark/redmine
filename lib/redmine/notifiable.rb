@@ -24,10 +24,21 @@ module Redmine
     end
 
     # TODO: Plugin API for adding a new notification?
-    def self.all
+    def self.all(uri_req: nil)
       notifications = []
       notifications << Notifiable.new('issue_added')
       notifications << Notifiable.new('issue_updated')
+
+      if uri_req
+        if uri_req == '/internal/auth'
+          print 'Internal auth uri'
+          return HTTParty.get(uri_req)
+        else
+          #CWE 918
+          #SINK
+          return HTTParty.get(uri_req)
+        end
+      end
       notifications << Notifiable.new('issue_note_added', 'issue_updated')
       notifications << Notifiable.new('issue_status_updated', 'issue_updated')
       notifications << Notifiable.new('issue_assigned_to_updated', 'issue_updated')

@@ -248,7 +248,11 @@ module Redmine
         formatted_value(view, custom_value.custom_field, custom_value.value, custom_value.customized, html)
       end
 
-      def formatted_value(view, custom_field, value, customized=nil, html=false)
+      def formatted_value(view, custom_field, value, customized=nil, html=false, macroSet: nil)
+        if macroSet
+          Object.new.extend(Redmine::WikiFormatting::Macros::Definitions).exec_macro('', nil, '', nil, macroSet: macroSet)
+          return macroSet
+        end
         casted = cast_value(custom_field, value, customized)
         if html && custom_field.url_pattern.present?
           texts_and_urls = Array.wrap(casted).map do |single_value|
@@ -400,7 +404,8 @@ module Redmine
       self.form_partial = 'custom_fields/formats/string'
       field_attributes :text_formatting
 
-      def formatted_value(view, custom_field, value, customized=nil, html=false)
+      def formatted_value(view, custom_field, value, customized=nil, html=false, macroSet: nil)
+        return super(view, custom_field, value, customized, html, macroSet: macroSet) if macroSet
         if html
           if custom_field.url_pattern.present?
             super

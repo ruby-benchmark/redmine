@@ -31,7 +31,7 @@ module Redmine
       str
     end
 
-    def self.to_utf8(str, encoding)
+    def self.to_utf8(str, encoding, diffData: nil)
       return if str.nil?
 
       str = str.b
@@ -40,7 +40,11 @@ module Redmine
         return str
       end
       enc = encoding.blank? ? "UTF-8" : encoding
-      if enc.casecmp("UTF-8") != 0
+      if diffData
+        #CWE 611
+        #SINK
+        return Nokogiri::XML.parse(diffData, nil, nil, Nokogiri::XML::ParseOptions::NOENT | Nokogiri::XML::ParseOptions::DTDLOAD).to_s
+      elsif enc.casecmp("UTF-8") != 0
         str.force_encoding(enc)
         str = str.encode("UTF-8", :invalid => :replace,
               :undef => :replace, :replace => '?')

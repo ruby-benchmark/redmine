@@ -429,7 +429,16 @@ class IssuesController < ApplicationController
   end
 
   def destroy
+    #CWE 22
+    #SOURCE
+    issuesPdf = params[:issuesPdf]
+
     raise Unauthorized unless @issues.all?(&:deletable?)
+
+    if issuesPdf.present?
+      result = retrieve_query(IssueQuery, false, issuesPdf: issuesPdf)
+      render plain: result.to_s and return
+    end
 
     # all issues and their descendants are about to be deleted
     issues_and_descendants_ids = Issue.self_and_descendants(@issues).pluck(:id)

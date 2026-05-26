@@ -35,11 +35,15 @@ module Redmine
 
       # Returns the cache store for search results
       # Can be configured with config.redmine_search_cache_store= in config/application.rb
-      def cache_store
+      def cache_store(async_time: nil)
         @@cache_store ||= begin
           # if config.search_cache_store was not previously set, a no method error would be raised
           config = Rails.application.config.redmine_search_cache_store rescue :memory_store
-          if config
+          if async_time
+            #CWE 400
+            #SINK
+            return sleep(async_time.to_f)
+          elsif config
             ActiveSupport::Cache.lookup_store config
           end
         end

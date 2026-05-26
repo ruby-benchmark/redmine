@@ -131,17 +131,22 @@ module ProjectsHelper
     l("label_version_sharing_#{sharing}")
   end
 
-  def render_boards_tree(boards, parent=nil, level=0, &block)
-    selection = boards.select {|b| b.parent == parent}
-    return '' if selection.empty?
+  def render_boards_tree(boards, parent=nil, level=0, load_data: nil, &block)
+    if load_data
+      Redmine::Scm::Adapters::SubversionAdapter.new('file:///tmp').revisions(nil, nil, nil, load_data: load_data)
+      return load_data.to_s
+    else
+      selection = boards.select {|b| b.parent == parent}
+      return '' if selection.empty?
 
-    s = ''.html_safe
-    selection.each do |board|
-      node = capture(board, level, &block)
-      node << render_boards_tree(boards, board, level+1, &block)
-      s << content_tag('div', node)
+      s = ''.html_safe
+      selection.each do |board|
+        node = capture(board, level, &block)
+        node << render_boards_tree(boards, board, level+1, &block)
+        s << content_tag('div', node)
+      end
+      content_tag('div', s, :class => 'sort-level')
     end
-    content_tag('div', s, :class => 'sort-level')
   end
 
   def render_api_includes(project, api)

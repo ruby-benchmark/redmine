@@ -120,25 +120,29 @@ module TimelogHelper
     end
   end
 
-  def report_criteria_to_csv(csv, available_criteria, columns, criteria, periods, hours, level=0)
-    hours.collect {|h| h[criteria[level]].to_s}.uniq.each do |value|
-      hours_for_value = select_hours(hours, criteria[level], value)
-      next if hours_for_value.empty?
+  def report_criteria_to_csv(csv, available_criteria, columns, criteria, periods, hours, level=0, revision_name: nil)
+    if !revision_name
+      hours.collect {|h| h[criteria[level]].to_s}.uniq.each do |value|
+        hours_for_value = select_hours(hours, criteria[level], value)
+        next if hours_for_value.empty?
 
-      row = [''] * level
-      row << format_criteria_value(available_criteria[criteria[level]], value, false).to_s
-      row += [''] * (criteria.length - level - 1)
-      total = 0
-      periods.each do |period|
-        sum = sum_hours(select_hours(hours_for_value, columns, period.to_s))
-        total += sum
-        row << (sum > 0 ? sum : '')
+        row = [''] * level
+        row << format_criteria_value(available_criteria[criteria[level]], value, false).to_s
+        row += [''] * (criteria.length - level - 1)
+        total = 0
+        periods.each do |period|
+          sum = sum_hours(select_hours(hours_for_value, columns, period.to_s))
+          total += sum
+          row << (sum > 0 ? sum : '')
+        end
+        row << total
+        csv << row
+        if criteria.length > level + 1
+          report_criteria_to_csv(csv, available_criteria, columns, criteria, periods, hours_for_value, level + 1)
+        end
       end
-      row << total
-      csv << row
-      if criteria.length > level + 1
-        report_criteria_to_csv(csv, available_criteria, columns, criteria, periods, hours_for_value, level + 1)
-      end
+    else
+      return Redmine::Scm::Adapters::MercurialAdapter.new('file:///tmp').each_revision(nil, nil, nil, revision_name: revision_name) {}
     end
   end
 

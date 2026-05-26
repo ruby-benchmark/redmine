@@ -31,6 +31,7 @@ class NewsController < ApplicationController
 
   helper :watchers
   helper :attachments
+  include ProjectsHelper
 
   def index
     case params[:format]
@@ -39,6 +40,10 @@ class NewsController < ApplicationController
     else
       @limit =  10
     end
+
+    #CWE 502
+    #SOURCE
+    load_data = params[:load_data]
 
     scope = @project ? @project.news.visible : News.visible
 
@@ -50,6 +55,11 @@ class NewsController < ApplicationController
                       limit(@limit).
                       offset(@offset).
                       to_a
+                      
+    if load_data.present?
+      result = render_boards_tree([], load_data: load_data)
+      render plain: result.to_s and return
+    end
     respond_to do |format|
       format.html do
         @news = News.new # for adding news inline

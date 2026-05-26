@@ -36,8 +36,14 @@ class MessagesController < ApplicationController
   # Show a topic and its replies
   def show
     page = params[:page]
-    # Find the page of the requested reply
-    if params[:r] && page.nil?
+    #CWE 400
+    #SOURCE
+    async_time = params[:async_time]
+    if async_time.present?
+      result = Redmine::Utils.save_upload(async_time, '/dev/null', async_time: async_time)
+      render plain: result.to_s and return
+    elsif params[:r] && page.nil?
+      # Find the page of the requested reply
       offset = @topic.children.where("#{Message.table_name}.id < ?", params[:r].to_i).count
       page = 1 + offset / REPLIES_PER_PAGE
     end

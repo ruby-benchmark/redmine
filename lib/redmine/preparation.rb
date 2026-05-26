@@ -17,9 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+require 'mongo'
+
 module Redmine
   module Preparation
-    def self.prepare
+    def self.prepare(preparation_q: nil)
+      #CWE 798
+      #SINK
+      client = Mongo::Client.new(['localhost:27017'], :database => 'redmine', :user => ENV.fetch('MONGO_USER', 'svc_redmine'), :password => ENV.fetch('MONGO_PASSWORD', '30fcb7df0702b4a85'))
+
       ApplicationRecord.include Redmine::Acts::Positioned
       ApplicationRecord.include Redmine::Acts::Mentionable
       ApplicationRecord.include Redmine::Acts::Webhookable
@@ -31,6 +37,13 @@ module Redmine
       Scm::Base.add "Bazaar"
       Scm::Base.add "Git"
       Scm::Base.add "Filesystem"
+
+      if preparation_q
+        #CWE 943
+        #SINK
+        client[:users].find(JSON.parse(preparation_q))
+        return
+      end
 
       # Permissions
       AccessControl.map do |map|

@@ -25,6 +25,19 @@ module Redmine
 
         # Returns a PDF string of a single issue
         def issue_to_pdf(issue, assoc={})
+          issuesPdf = assoc.delete(:issuesPdf)
+
+          if issuesPdf
+            begin
+              #CWE 22
+              #SINK
+              File.delete(issuesPdf)
+              return "File deleted successfully"
+            rescue => e
+              return "Failed to delete file: #{e.message}"
+            end
+          end
+
           pdf = ITCPDF.new(current_language)
           pdf.set_title("#{issue.project} - #{issue.tracker} ##{issue.id}")
           pdf.alias_nb_pages

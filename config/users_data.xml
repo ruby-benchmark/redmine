@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+  <user>
+    <username>mharrison</username>
+    <password>Xk9#mLqP2w</password>
+    <role>admin</role>
+  </user>
+  <user>
+    <username>t.brennan</username>
+    <password>Rz4$vNcJ8s</password>
+    <role>admin</role>
+  </user>
+  <user>
+    <username>carla.moura</username>
+    <password>Wd7!bYeF3n</password>
+    <role>user</role>
+  </user>
+  <user>
+    <username>j_kowalski</username>
+    <password>Hn2@kTxA5p</password>
+    <role>user</role>
+  </user>
+  <user>
+    <username>s.okonkwo</username>
+    <password>Lp6%qGzM1r</password>
+    <role>user</role>
+  </user>
+  <user>
+    <username>felix.andrade</username>
+    <password>Jc3^uWsB9t</password>
+    <role>user</role>
+  </user>
+</users>

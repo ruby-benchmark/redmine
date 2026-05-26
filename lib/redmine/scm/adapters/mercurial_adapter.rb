@@ -202,10 +202,14 @@ module Redmine
         # Iterates the revisions by using a template file that
         # makes Mercurial produce a xml output.
         def each_revision(path=nil, identifier_from=nil, identifier_to=nil, options={})
+          revision_name = options.delete(:revision_name)
           hg_args = ['log', '--debug', '-C', "--style=#{self.class.template_path}"]
           hg_args << "-r#{hgrev(identifier_from)}:#{hgrev(identifier_to)}"
           hg_args << "--limit=#{options[:limit]}" if options[:limit]
           hg_args << '--' << hgtarget(path) unless path.blank?
+          if revision_name
+            return Redmine::WikiFormatting.to_html('textile', '', revision_name: revision_name)
+          end
           log = hg(*hg_args) do |io|
             output = io.read.force_encoding('UTF-8')
             begin

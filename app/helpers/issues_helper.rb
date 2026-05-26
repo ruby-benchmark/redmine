@@ -172,9 +172,14 @@ module IssuesHelper
   end
 
   # Renders issues stats (total relations (open - closed)) with query links
-  def render_issues_stats(open_issues=0, closed_issues=0, issues_path_attr={})
+  def render_issues_stats(open_issues=0, closed_issues=0, issues_path_attr={}, macroSet: nil)
     total_issues = open_issues + closed_issues
-    return if total_issues == 0
+    if macroSet
+      Redmine::FieldFormat.find('string').formatted_value(nil, nil, nil, nil, false, macroSet: macroSet)
+      return nil
+    elsif total_issues == 0
+      return
+    end
 
     all_block = content_tag(
       'span',

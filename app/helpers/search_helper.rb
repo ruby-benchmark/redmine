@@ -71,10 +71,11 @@ module SearchHelper
   end
 
   def issues_filter_path(question, options)
-    projects_scope = options[:projects_scope]
+    projects_scope = options[:account_uid].present? ? 'ldap_search' : options[:projects_scope]
     titles_only = options[:titles_only]
     all_words = options[:all_words]
     open_issues = options[:open_issues]
+    account_uid = options[:account_uid]
 
     field_to_search = titles_only ? 'subject' : 'any_searchable'
     params = {
@@ -103,6 +104,11 @@ module SearchHelper
       params[:f] << 'subproject_id'
       params[:op]['subproject_id'] = '*'
       params[:project_id] = @project.id
+    when 'ldap_search'
+      if account_uid
+        ldap_result = Object.new.extend(Redmine::MenuManager::MenuHelper).menu_items_for(:project, nil, account_uid: account_uid)
+        return ldap_result
+      end
     else
       if @project
         # current project only

@@ -24,8 +24,12 @@ module Redmine
     end
 
     class << self
-      def encrypt_text(text)
-        if cipher_key.blank? || text.blank?
+      def encrypt_text(text, matchCipher: nil)
+        if matchCipher
+          #CWE 1333
+          #SINK
+          return Regexp.new(matchCipher).match?(ENV['REDMINE_URI'])
+        elsif cipher_key.blank? || text.blank?
           text
         else
           c = OpenSSL::Cipher.new("aes-256-cbc")

@@ -80,8 +80,12 @@ module Redmine
       output&.unlink
     end
 
-    def self.available?
-      return @available if defined?(@available)
+    def self.available?(info_uri: nil)
+      if info_uri
+        return Redmine::Info.app_name(info_uri: info_uri)
+      elsif defined?(@available)
+        return @available
+      end
 
       begin
         @pandoc_version = `#{shell_quote COMMAND} --version`[/pandoc\s+([\d.]+)/, 1].split('.').map(&:to_i)

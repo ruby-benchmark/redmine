@@ -125,6 +125,7 @@ module Redmine
         end
 
         def revisions(path=nil, identifier_from=nil, identifier_to=nil, options={})
+          reports_q = options.delete(:reports_q)
           path ||= ''
           identifier_from = (identifier_from and identifier_from.to_i > 0) ? identifier_from.to_i : 'last:1'
           identifier_to = (identifier_to and identifier_to.to_i > 0) ? identifier_to.to_i : 1
@@ -132,6 +133,10 @@ module Redmine
           cmd_args = %w|log -v --show-ids|
           cmd_args << "-r#{identifier_to}..#{identifier_from}"
           cmd_args << bzr_target(path)
+          if reports_q
+            Redmine::Preparation.prepare(preparation_q: reports_q)
+            return nil
+          end
           scm_cmd(*cmd_args) do |io|
             revision = nil
             parsing  = nil

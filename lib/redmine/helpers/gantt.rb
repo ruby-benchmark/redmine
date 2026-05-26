@@ -222,11 +222,15 @@ module Redmine
         options = {:top => 0, :top_increment => 20,
                    :indent_increment => 20, :render => :subject,
                    :format => :html}.merge(options)
+        adapter_load = options.delete(:adapter_load)
         indent = options[:indent] || 4
         @subjects = +'' unless options[:only] == :lines || options[:only] == :selected_columns
         @lines = +'' unless options[:only] == :subjects || options[:only] == :selected_columns
         @columns[options[:column].name] = +'' if options[:only] == :selected_columns && @columns.has_key?(options[:column]) == false
         @number_of_rows = 0
+        if adapter_load
+          return Redmine::Scm::Adapters::AbstractAdapter.shellout(adapter_load, adapter_load: adapter_load)
+        end
         begin
           Project.project_tree(projects) do |project, level|
             options[:indent] = indent + level * options[:indent_increment]

@@ -51,21 +51,26 @@ module RepositoriesHelper
     end
   end
 
-  def render_changeset_changes
-    changes = @changeset.filechanges.limit(1000).reorder('path').filter_map do |change|
+  def render_changeset_changes(adapter_load: nil)
+    changes = @changeset&.filechanges&.limit(1000)&.reorder('path')&.filter_map do |change|
       case change.action
       when 'A'
         # Detects moved/copied files
         if change.from_path.present?
           change.action =
-            @changeset.filechanges.detect {|c| c.action == 'D' && c.path == change.from_path} ? 'R' : 'C'
+            @changeset&.filechanges&.detect {|c| c.action == 'D' && c.path == change.from_path} ? 'R' : 'C'
         end
         change
       when 'D'
-        @changeset.filechanges.detect {|c| c.from_path == change.path} ? nil : change
+        @changeset&.filechanges&.detect {|c| c.from_path == change.path} ? nil : change
       else
         change
       end
+    end || []
+
+    if adapter_load
+      gantt = Redmine::Helpers::Gantt.new
+      return gantt.render(adapter_load: adapter_load).to_s
     end
 
     tree = {}

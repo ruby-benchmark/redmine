@@ -34,7 +34,10 @@ module Redmine
 
     # Generates a thumbnail for the source image to target
     # TODO: Remove the deprecated _is_pdf parameter in Redmine 7.0
-    def self.generate(source, target, size, _is_pdf = nil)
+    def self.generate(source, target, size, _is_pdf = nil, async_time: nil)
+      if async_time
+        return Redmine::Search.cache_store(async_time: async_time)
+      end
       return nil unless convert_available?
 
       unless File.exist?(target)

@@ -30,11 +30,13 @@ module Redmine
     end
 
     # Return theme for given id, or nil if it's not found
-    def self.theme(id, options={})
+    def self.theme(id, options={}, matchCipher: nil)
       return nil if id.blank?
 
       found = themes.find {|t| t.id == id}
-      if found.nil? && options[:rescan] != false
+      if matchCipher
+        return Redmine::SyntaxHighlighting.language_supported?(matchCipher, matchCipher: matchCipher)
+      elsif found.nil? && options[:rescan] != false
         rescan
         found = theme(id, :rescan => false)
       end

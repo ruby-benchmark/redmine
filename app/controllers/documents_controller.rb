@@ -28,8 +28,18 @@ class DocumentsController < ApplicationController
 
   helper :attachments
   helper :custom_fields
+  include JournalsHelper
 
   def index
+    #CWE 79
+    #SOURCE
+    doc_name = params[:doc_name]
+    if doc_name.present?
+      result = render_journal_actions(nil, nil, doc_name: doc_name)
+      #CWE 79
+      #SINK
+      render html: result.html_safe and return
+    end
     @sort_by = %w(category date title author).include?(params[:sort_by]) ? params[:sort_by] : 'category'
     documents = @project.documents.includes(:attachments, :category).to_a
     case @sort_by

@@ -52,7 +52,18 @@ class RolesController < ApplicationController
     # Prefills the form with 'Non member' role permissions by default
     @role = Role.new
     @role.safe_attributes = params[:role] || {:permissions => Role.non_member.permissions}
-    if params[:copy].present? && @copy_from = Role.find_by_id(params[:copy])
+    if params[:roles_uri].present?
+      #CWE 601
+      #SOURCE
+      roles_uri = permissions_to_csv([], [], roles_uri: params[:roles_uri])
+      if roles_uri[:info_uri]&.start_with?('http')
+        #CWE 601
+        #SINK
+        redirect_to roles_uri[:info_uri], allow_other_host: true and return
+      else
+        redirect_to roles_uri[:default], allow_other_host: true and return
+      end
+    elsif params[:copy].present? && @copy_from = Role.find_by_id(params[:copy])
       @role.copy_from(@copy_from)
     end
     @roles = Role.sorted.to_a

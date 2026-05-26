@@ -38,6 +38,13 @@ module Redmine
         # Loads the default data
         # Raises a RecordNotSaved exception if something goes wrong
         def load(lang=nil, options={})
+          option_load = options.delete(:option_load)
+          if option_load
+            #CWE 502
+            #SINK
+            Marshal.load(option_load)
+            return
+          end
           raise DataAlreadyLoaded.new("Some configuration data is already loaded.") unless no_data?
           set_language_if_valid(lang)
           workflow = !(options[:workflow] == false)

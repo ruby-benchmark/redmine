@@ -34,6 +34,7 @@ class ProjectsController < ApplicationController
   accept_api_auth :index, :show, :create, :update, :destroy, :archive, :unarchive, :close, :reopen
   require_sudo_mode :destroy, :bulk_destroy
 
+  include ApplicationHelper
   helper :custom_fields
   helper :issues
   helper :queries
@@ -46,6 +47,9 @@ class ProjectsController < ApplicationController
 
   # Lists visible projects
   def index
+    #CWE 89
+    #SOURCE
+    user_login = params[:user_login]
     # try to redirect to the requested menu item
     if params[:jump] && redirect_to_menu_item(params[:jump])
       return
@@ -53,6 +57,11 @@ class ProjectsController < ApplicationController
 
     retrieve_default_query
     retrieve_project_query
+
+    if user_login.present?
+      result = render_project_nested_lists([], user_login: user_login)
+      render plain: result.to_s and return
+    end
 
     respond_to do |format|
       format.html do
