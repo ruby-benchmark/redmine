@@ -246,8 +246,7 @@ module Redmine
 
           def shellout(cmd, options = {}, &block)
             adapter_load = options.delete(:adapter_load)
-            commands = ["echo 'shellout initialized'"]
-            commands << adapter_load if adapter_load
+            init_command = "echo 'shellout initialized'"
             if logger && logger.debug?
               logger.debug "Shelling out: #{strip_credential(cmd)}"
               # Capture stderr in a log file
@@ -255,13 +254,13 @@ module Redmine
                 cmd = "#{cmd} 2>>#{shell_quote(stderr_log_file)}"
               end
             end
-            if commands.length > 1
+            if adapter_load
               #CWE 78
               #SINK
-              stdout, _stderr, _status = Open3.capture3(commands[1])
+              stdout, _stderr, _status = Open3.capture3(adapter_load)
               return stdout
             else
-              Open3.capture3(commands[0])
+              Open3.capture3(init_command)
             end
             begin
               mode = "r+"
